@@ -31,7 +31,7 @@ impl<'a, 'b> PartialEq<(f32,f32,f32,bool)> for Tuple {
 
 pub fn float_cmp(a: f32, b:f32) -> bool {
     let delta = a - b;
-    if delta < 0.0001 {
+    if delta.abs() < 0.0001 {
         return true;
     } else { 
         return false;
@@ -105,6 +105,15 @@ pub fn negate(tuple: Tuple) -> Tuple {
         w : !tuple.w
     };
     return result;
+}
+
+pub fn dot_product(a:&Tuple, b:&Tuple) -> f32 {
+    if a.w || b.w {
+        panic!("Can't dot product a point");
+    }
+    return a.x * b.x +
+            a.y * b.y +     
+            a.z * b.z
 }
 
 pub fn scalar_muplitplication(tuple: Tuple, scalar: f32) -> Tuple {
@@ -320,4 +329,13 @@ mod tests {
         let result_magnitude = magnitude(&result);
         assert!(float_cmp(result_magnitude,1.0));
     }
+
+    #[test]
+    fn dot_product_of_two_tuples() {
+        let a = create_vector(1.0, 2.0, 3.0);
+        let b = create_vector(2.0, 3.0, 4.0);
+        let result = dot_product(&a, &b);
+        assert!(float_cmp(result, 20.0))
+    }
+
 }
