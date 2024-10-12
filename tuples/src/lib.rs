@@ -1,6 +1,8 @@
+
+const EPSILON: f32 = 0.0001;
+
 #[derive(Debug)]
 #[allow(dead_code)]
-
 #[derive(PartialEq)]
 pub struct Tuple {
     x: f32,
@@ -24,6 +26,40 @@ impl<'a, 'b> PartialEq<(f32,f32,f32,bool)> for Tuple {
         self.y.eq(&other.1) &&
         self.z.eq(&other.2) &&
         self.w == other.3
+    }
+}
+
+pub fn float_cmp(a: f32, b:f32) -> bool {
+    let delta = a - b;
+    if delta < 0.0001 {
+        return true;
+    } else { 
+        return false;
+    }
+}
+
+pub fn tuple_cmp(a: &Tuple, b: &Tuple) -> bool {
+    let delta_x = a.x - b.x;
+    let delta_y = a.y - b.y;
+    let delta_z = a.z - b.z;
+    let same_type = xand(a.w, b.w);
+
+    let delta_x_good = delta_x < EPSILON;
+    let delta_y_good = delta_y < EPSILON;
+    let delta_z_good = delta_z < EPSILON;
+
+    return delta_x_good && delta_y_good && delta_z_good && same_type
+}
+
+pub fn xand(a: bool, b: bool) -> bool {
+    if !a && !b {
+        return true;
+    } else if !a && b{
+        return false;
+    } else if a && !b {
+        return false;
+    } else {
+        return true;
     }
 }
 
@@ -96,7 +132,7 @@ pub fn is_point(tuple: &Tuple) -> bool {
     if tuple.w {
         return true;
     }
-    return false;
+    return false
 }
 
 pub fn is_vector(tuple: &Tuple) -> bool {
@@ -109,7 +145,18 @@ pub fn is_vector(tuple: &Tuple) -> bool {
 
 pub fn magnitude(tuple: &Tuple) -> f32 {
     let number: f32 = tuple.x.powi(2) + tuple.y.powi(2) + tuple.z.powi(2); 
-    return number.sqrt();
+    number.sqrt()
+}
+
+pub fn normalization(tuple: &Tuple) -> Tuple {
+    let magnitude = magnitude(tuple);
+    let result = Tuple {
+        x: tuple.x/magnitude,
+        y: tuple.y/magnitude,
+        z: tuple.z/magnitude,
+        w: false
+    };
+    result
 }
 
 #[cfg(test)]
@@ -231,7 +278,6 @@ mod tests {
         assert_eq!(magnitude(&v), 1.0);
     }
 
-
     #[test]
     fn test_magnitude_3() {
         let v = create_vector(0.0, 0.0, 1.0);
@@ -245,7 +291,6 @@ mod tests {
         assert_eq!(magnitude(&v), fourteen.sqrt());
     }
 
-
     #[test]
     fn test_magnitude_5() {
         let v = create_vector(-1.0, -2.0, -3.0);
@@ -253,4 +298,26 @@ mod tests {
         assert_eq!(magnitude(&v), fourteen.sqrt());
     }
 
+
+    #[test]
+    fn test_normalise_1() {
+        let v = create_vector(4.0, 0.0, 0.0);
+        let result = normalization(&v);
+        assert_eq!(result, create_vector(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn test_normalise_2() {
+        let v = create_vector(1.0, 2.0, 3.0);
+        let result = normalization(&v);
+        assert!(tuple_cmp(&result, &create_vector(0.26726, 0.53452, 0.80178)));
+    }
+
+    #[test]
+    fn test_normalise_3() { // todo make this correct
+        let v = create_vector(1.0, 2.0, 3.0);
+        let result = normalization(&v);
+        let result_magnitude = magnitude(&result);
+        assert!(float_cmp(result_magnitude,1.0));
+    }
 }
