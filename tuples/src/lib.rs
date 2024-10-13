@@ -44,9 +44,9 @@ pub fn tuple_cmp(a: &Tuple, b: &Tuple) -> bool {
     let delta_z = a.z - b.z;
     let same_type = xand(a.w, b.w);
 
-    let delta_x_good = delta_x < EPSILON;
-    let delta_y_good = delta_y < EPSILON;
-    let delta_z_good = delta_z < EPSILON;
+    let delta_x_good = delta_x.abs() < EPSILON;
+    let delta_y_good = delta_y.abs() < EPSILON;
+    let delta_z_good = delta_z.abs() < EPSILON;
 
     return delta_x_good && delta_y_good && delta_z_good && same_type
 }
@@ -114,6 +114,17 @@ pub fn dot_product(a:&Tuple, b:&Tuple) -> f32 {
     return a.x * b.x +
             a.y * b.y +     
             a.z * b.z
+}
+
+pub fn cross_product(a: &Tuple, b: &Tuple) -> Tuple {
+    if a.w || b.w {
+        panic!("Can't cross product a point -> a is a point?: {aw:?}, b is a point?: {bw:?}", aw = a.w, bw = b.w);
+    }
+    return create_vector(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        )   
 }
 
 pub fn scalar_muplitplication(tuple: Tuple, scalar: f32) -> Tuple {
@@ -338,4 +349,54 @@ mod tests {
         assert!(float_cmp(result, 20.0))
     }
 
+    #[test]
+    #[should_panic]
+    fn dot_product_of_vector_and_point() {
+        let a = create_vector(1.0, 2.0, 3.0);
+        let b = create_point(2.0, 3.0, 4.0);
+        dot_product(&a, &b);
+    }
+
+    #[test]
+    #[should_panic]
+    fn dot_product_of_two_points() {
+        let a = create_point(1.0, 2.0, 3.0);
+        let b = create_point(2.0, 3.0, 4.0);
+        dot_product(&a, &b);
+    }
+    
+    #[test]
+    fn cross_product_of_two_vectors() {
+        let a = create_vector(1.0, 2.0, 3.0);    
+        let b = create_vector(2.0, 3.0, 4.0);    
+        let result = cross_product(&a, &b);
+        let result_prime = cross_product(&b, &a);
+        assert!(tuple_cmp(&result, &create_vector(-1.0, 2.0, -1.0)));  
+        assert!(tuple_cmp(&result_prime, &create_vector(1.0, -2.0, 1.0)));  
+    }
+
+    #[test]
+    #[should_panic]
+    fn cross_product_of_a_point_and_a_vector() {
+        let a = create_vector(1.0, 2.0, 3.0);    
+        let b = create_point(2.0, 3.0, 4.0);    
+        cross_product(&a, &b);
+    }
+
+
+    #[test]
+    #[should_panic]
+    fn cross_product_of_a_point_and_a_vector_2() {
+        let a = create_point(1.0, 2.0, 3.0);    
+        let b = create_vector(2.0, 3.0, 4.0);    
+        cross_product(&a, &b);
+    }
+
+    #[test]
+    #[should_panic]
+    fn cross_product_of_two_points() {
+        let a = create_point(1.0, 2.0, 3.0);    
+        let b = create_point(2.0, 3.0, 4.0);    
+        cross_product(&a, &b);
+    }
 }
