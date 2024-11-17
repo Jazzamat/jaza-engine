@@ -1,4 +1,3 @@
-
 const EPSILON: f32 = 0.0001;
 
 #[derive(Debug)]
@@ -9,6 +8,23 @@ pub struct Tuple {
     y: f32,
     z: f32,
     w: bool // true if is a point otherwise its a vector
+}
+
+impl Tuple {
+    pub fn new(x:f32,y:f32,z:f32,w:bool) -> Self{
+        Tuple{x,y,z,w}
+    }
+    pub fn x(&self) -> f32 {
+        self.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.y
+    }
+
+    pub fn z(&self) -> f32 {
+        self.z
+    }
 }
 
 impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,bool) {
@@ -38,6 +54,12 @@ pub fn float_cmp(a: f32, b:f32) -> bool {
     }
 }
 
+pub fn is_point_at_or_below_ground(point: &Tuple) -> bool {
+    if is_vector(&point) {panic!("This function needs a point, not vectors");}
+    let delta_zero = point.y - 0.0;
+    return delta_zero <= EPSILON;
+}
+
 pub fn tuple_cmp(a: &Tuple, b: &Tuple) -> bool {
     let delta_x = a.x - b.x;
     let delta_y = a.y - b.y;
@@ -63,8 +85,9 @@ pub fn xand(a: bool, b: bool) -> bool {
     }
 }
 
+
 pub fn create_point(x:f32,y:f32,z:f32) -> Tuple {
-    Tuple{x,y,z,w:true} // dumbest thing ever so far
+    Tuple{x,y,z,w:true} // dumbest thing ever so far // why?
 }
 
 pub fn create_vector(x:f32,y:f32,z:f32) -> Tuple {
@@ -124,10 +147,11 @@ pub fn cross_product(a: &Tuple, b: &Tuple) -> Tuple {
             a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,
             a.x * b.y - a.y * b.x
-        )   
+    )   
 }
 
-pub fn scalar_muplitplication(tuple: Tuple, scalar: f32) -> Tuple {
+pub fn scalar_muplitplication(tuple: Tuple, scalar: f32) -> Tuple { // TODO would adjusting the old
+    // tuples value be more performant?
     let result = Tuple {
         x: tuple.x * scalar,
         y: tuple.y * scalar,
@@ -223,6 +247,22 @@ mod tests {
         let a2 = Tuple{ x:-2.0, y:3.0, z:1.0, w:false};
         let result = add(&a1, &a2);
         assert_eq!(result, (1.0,1.0,6.0,true));
+    }
+
+    #[test]
+    fn test_addition_of_points() {
+        let a1 = create_point(3.0, -2.0, 5.0);
+        let a2 = create_point(-2.0, 3.0, 1.0);
+        let result = add(&a1, &a2);
+        assert_eq!(result, create_point(1.0, 1.0, 6.0));
+    }
+
+    #[test]
+    fn test_addition_of_points_and_vectors() {
+        let a1 = create_point(3.0, -2.0, 5.0);
+        let a2 = create_vector(-2.0, 3.0, 1.0);
+        let result = add(&a1, &a2);
+        assert_eq!(result, create_point(1.0, 1.0, 6.0));
     }
 
     #[test]
@@ -383,7 +423,6 @@ mod tests {
         cross_product(&a, &b);
     }
 
-
     #[test]
     #[should_panic]
     fn cross_product_of_a_point_and_a_vector_2() {
@@ -399,4 +438,29 @@ mod tests {
         let b = create_point(2.0, 3.0, 4.0);    
         cross_product(&a, &b);
     }
+
+    #[test]
+    fn test_is_point_on_the_ground() {
+        let point = create_point(0.0, 0.0, 0.0);
+        assert!(is_point_at_or_below_ground(&point));
+    }
+
+    #[test]
+    fn test_is_point_blow_ground() {
+        let point = create_point(0.0, -19.0, 0.0);
+        assert!(is_point_at_or_below_ground(&point));
+    }
+
+    #[test]
+    fn test_is_point_is_only_just_above_ground() {
+        let point = create_point(0.0, 0.001, 0.0);
+        assert!(!is_point_at_or_below_ground(&point));
+    }
+
+    #[test]
+    fn test_is_point_is_only_just_below_ground() {
+        let point = create_point(0.0, -0.001, 0.0);
+        assert!(is_point_at_or_below_ground(&point));
+    }
 }
+    
