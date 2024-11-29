@@ -1,50 +1,29 @@
 use tuples::Tuple;
+use color::Color;
 
-pub struct Color {
-    tuple: tuples::Tuple,
+pub struct Canvas {
+    width: usize,
+    height: usize,
+    pixels: Vec<Vec<Color>>
 }
 
-
-impl Color {
-    pub fn new(red: f32, green: f32, blue: f32) -> Self {
-        let tuple = Tuple::new(red, green, blue, false);
-        Color {tuple}
-    }
-
-    pub fn red(&self)-> f32 {
-        self.tuple.x()
-    }
-
-    pub fn green(&self)-> f32 {
-        self.tuple.y()
-    }
-
-    pub fn blue(&self)-> f32 {
-        self.tuple.z()
-    }
-
-    pub fn add(c1: Color, c2: Color) -> Color {
-        let tuple = tuples::add(&c1.tuple, &c2.tuple);
-        Color{tuple}
-    }
-
-    pub fn subtract(c1: Color, c2: Color) -> Color {
-        let tuple = tuples::subtract(&c1.tuple, &c2.tuple);
-        Color{tuple}
-    }
-
-    pub fn scalar_muplitplication(c1: Color, scalar:f32) -> Color{
-         Color{tuple:tuples::scalar_muplitplication(c1.tuple, scalar)}
+impl Canvas {
+    pub fn new(width: usize, height: usize) -> Self {
+        Canvas{width, height, pixels: vec![vec![Color::new(0.0,0.0,0.0);width];height]}
     }
 }
 
-pub fn float_cmp(a: f32, b:f32) -> bool {
-    let delta = a - b;
-    if delta.abs() < 0.0001 {
-        return true;
-    } else { 
-        return false;
-    }
+pub fn write_pixel(canvas: &mut Canvas, x: usize,y: usize, color: Color) {
+      canvas.pixels[x][y] = color;  
+}
+
+pub fn canvas_to_ppm(canvas: &mut Canvas) -> String {
+
+    let mut buf = String::new();
+    buf.push_str("P3\n"); 
+    buf.push_str(format!("{0} {1}\n", canvas.width, canvas.height).as_str());
+    buf.push_str("255");
+    return buf;
 }
 
 #[cfg(test)]
@@ -52,48 +31,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sanity_check() {
-        let result = 2+2;
-        assert_eq!(result, 4);
+    fn test_create_canvas() {
+        let canvas = Canvas::new(10, 20);
+        assert_eq!(canvas.width, 10);
+        assert_eq!(canvas.height, 20);
+        for i in 0..canvas.width - 1 {
+            for j in 0..canvas.height - 1 {
+                assert_eq!(canvas.pixels[j][i], Color::new(0.0,0.0,0.0));
+            }
+        }
     }
 
     #[test]
-    fn create_basic_colour() {
-        let colour = Color::new(-0.5, 0.4, 1.7);
-        assert!(colour.red() == -0.5);
-        assert!(colour.green() == 0.4);
-        assert!(colour.blue() == 1.7);
+    fn test_write_pixel() {
+        let mut canvas = Canvas::new(10,20);
+        let red = Color::new(1.0,0.0,0.0);
+        write_pixel(&mut canvas, 2, 3, red);
+        assert_eq!(canvas.pixels[2][3], red)
     }
 
     #[test]
-    fn add_colours() {
-        let c1 = Color::new (0.9, 0.6, 0.75);
-        let c2 = Color::new (0.7, 0.1, 0.25);
-        let result = Color::add(c1,c2);
-        assert!(float_cmp(result.red() , 1.6));
-        assert!(float_cmp(result.green(), 0.7));
-        assert!(float_cmp(result.blue() , 1.0));
+    fn test_constructing_the_ppm_header() {
+        let mut canvas = Canvas::new(5,3);
+        let ppm = canvas_to_ppm(&mut canvas);    
+        assert_eq!(ppm ,"P3\n5 3\n255")
     }
-
-    #[test]
-    fn subtract_colours() {
-        let c1 = Color::new (0.9, 0.6, 0.75);
-        let c2 = Color::new (0.7, 0.1, 0.25);
-        let result = Color::subtract(c1,c2);
-        assert!(float_cmp(result.red() , 0.2));
-        assert!(float_cmp(result.green(), 0.5));
-        assert!(float_cmp(result.blue() , 0.5));
-    }
-
-
-    #[test]
-    fn multiply_colors() {
-        let c1 = Color::new (0.2, 0.3, 0.4);
-        let result = Color::scalar_muplitplication(c1,2.0);
-        assert!(float_cmp(result.red() , 0.4));
-        assert!(float_cmp(result.green(), 0.6));
-        assert!(float_cmp(result.blue() , 0.8));
-    }
-
-
 }

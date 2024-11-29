@@ -1,0 +1,1 @@
+/home/omer/RustTracerChallenge/canvas/target/debug/libcanvas.rlib: /home/omer/RustTracerChallenge/canvas/src/lib.rs /home/omer/RustTracerChallenge/color/src/lib.rs /home/omer/RustTracerChallenge/tuples/src/lib.rs

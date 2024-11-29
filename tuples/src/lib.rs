@@ -3,6 +3,8 @@ const EPSILON: f32 = 0.0001;
 #[derive(Debug)]
 #[allow(dead_code)]
 #[derive(PartialEq)]
+#[derive(Clone)]
+#[derive(Copy)]
 pub struct Tuple {
     x: f32,
     y: f32,
@@ -25,29 +27,37 @@ impl Tuple {
     pub fn z(&self) -> f32 {
         self.z
     }
+
+    pub fn eq(&self, other: &Tuple) -> bool {
+        float_cmp(self.x, other.x) && 
+        float_cmp(self.y,other.y) &&
+        float_cmp(self.z,other.z) && 
+        self.w == other.w 
+    }
 }
 
 impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,bool) {
+
     fn eq(&self, other: &Tuple) -> bool {
-        self.0.eq(&other.x) && 
-        self.1.eq(&other.y) &&
-        self.2.eq(&other.z) && 
+        float_cmp(self.0, other.x) && 
+        float_cmp(self.1,other.y) &&
+        float_cmp(self.2,other.z) && 
         self.3 == other.w 
     }
 }
 
 impl<'a, 'b> PartialEq<(f32,f32,f32,bool)> for Tuple {
     fn eq(&self, other: &(f32,f32,f32,bool)) -> bool {
-        self.x.eq(&other.0) &&
-        self.y.eq(&other.1) &&
-        self.z.eq(&other.2) &&
+        float_cmp(self.x,other.0) &&
+        float_cmp(self.y,other.1) &&
+        float_cmp(self.z,other.2) &&
         self.w == other.3
     }
 }
 
 pub fn float_cmp(a: f32, b:f32) -> bool {
     let delta = a - b;
-    if delta.abs() < 0.0001 {
+    if delta.abs() < EPSILON {
         return true;
     } else { 
         return false;
@@ -61,16 +71,10 @@ pub fn is_point_at_or_below_ground(point: &Tuple) -> bool {
 }
 
 pub fn tuple_cmp(a: &Tuple, b: &Tuple) -> bool {
-    let delta_x = a.x - b.x;
-    let delta_y = a.y - b.y;
-    let delta_z = a.z - b.z;
-    let same_type = xand(a.w, b.w);
-
-    let delta_x_good = delta_x.abs() < EPSILON;
-    let delta_y_good = delta_y.abs() < EPSILON;
-    let delta_z_good = delta_z.abs() < EPSILON;
-
-    return delta_x_good && delta_y_good && delta_z_good && same_type
+    float_cmp(a.x, b.x) &&
+    float_cmp(a.y, b.y) &&
+    float_cmp(a.z, b.z) &&
+    xand(a.w, b.w)
 }
 
 pub fn xand(a: bool, b: bool) -> bool {
@@ -84,7 +88,6 @@ pub fn xand(a: bool, b: bool) -> bool {
         return true;
     }
 }
-
 
 pub fn create_point(x:f32,y:f32,z:f32) -> Tuple {
     Tuple{x,y,z,w:true} // dumbest thing ever so far // why?
@@ -139,6 +142,7 @@ pub fn dot_product(a:&Tuple, b:&Tuple) -> f32 {
             a.z * b.z
 }
 
+
 pub fn cross_product(a: &Tuple, b: &Tuple) -> Tuple {
     if a.w || b.w {
         panic!("Can't cross product a point -> a is a point?: {aw:?}, b is a point?: {bw:?}", aw = a.w, bw = b.w);
@@ -169,6 +173,15 @@ pub fn scalar_division(tuple: Tuple, scalar: f32) -> Tuple { // just because
         w: tuple.w && scalar.is_sign_positive(),
     };
     return result;
+}
+
+pub fn hadamard_product(a: &Tuple, b: &Tuple) -> Tuple {
+     Tuple::new(
+        a.x * b.x,
+        a.y * b.y,
+        a.z * b.z,
+        a.w && b.w
+    )
 }
 
 pub fn is_point(tuple: &Tuple) -> bool {
@@ -437,6 +450,14 @@ mod tests {
         let a = create_point(1.0, 2.0, 3.0);    
         let b = create_point(2.0, 3.0, 4.0);    
         cross_product(&a, &b);
+    }
+
+    #[test]
+    fn test_hadamard_product() { // TODO why do I need to compare each attribute?
+        let a = create_point(1.0, 0.2, 0.4);
+        let b = create_point(0.9, 1.0, 0.1);
+        let result = hadamard_product(&a, &b);
+        assert_eq!(result, (0.9,0.2,0.04, true));
     }
 
     #[test]

@@ -5,9 +5,11 @@
       <sourceFolder url="file://$MODULE_DIR$/canvas/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tuples/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/color/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/canvas/target" />
       <excludeFolder url="file://$MODULE_DIR$/engine/target" />
       <excludeFolder url="file://$MODULE_DIR$/tuples/target" />
+      <excludeFolder url="file://$MODULE_DIR$/color/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

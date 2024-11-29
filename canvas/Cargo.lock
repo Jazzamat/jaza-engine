@@ -6,6 +6,14 @@ version = 3
 name = "canvas"
 version = "0.1.0"
 dependencies = [
+ "color",
+ "tuples",
+]
+
+[[package]]
+name = "color"
+version = "0.1.0"
+dependencies = [
  "tuples",
 ]
 
