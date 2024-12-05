@@ -70,9 +70,8 @@ pub fn canvas_to_ppm(canvas: &mut Canvas) -> String {
 
         let mut next_pixel_size = 0;
         if i + 1 < pixel_vec.len() {
-            next_pixel_size = pixel_vec[i + 1].chars().count();
+             next_pixel_size = pixel_vec[i + 1].chars().count();
         }
-    
 
         if current_pixels_per_line == max_number_of_pixels_per_line  {
             buf.push('\n');
@@ -86,7 +85,6 @@ pub fn canvas_to_ppm(canvas: &mut Canvas) -> String {
             current_line_length = current_line_length + 1;
         }
     }
-
     return buf;
 }
 
@@ -147,5 +145,14 @@ mod tests {
 
         let ppm = canvas_to_ppm(&mut canvas);
         assert_eq!(ppm, "P3\n10 2\n255\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n");
+    }
+
+    #[test]
+    fn test_ends_with_newline() {
+        let mut canvas = Canvas::new(5, 3);
+        let ppm = canvas_to_ppm(&mut canvas);
+        let code:u8 = ppm.as_bytes()[ppm.len() - 1];
+        let char = code as char;
+        assert_eq!('\n', char);
     }
 }
