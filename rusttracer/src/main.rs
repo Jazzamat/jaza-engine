@@ -1,7 +1,9 @@
 use canvas::{canvas_to_ppm, Canvas};
+use std::alloc::System;
 use std::fs;
 use std::env;
 use std::str::FromStr;
+use std::time::SystemTime;
 use dirs;
 use color::Color;
 use rand::{self, Rng};
@@ -16,8 +18,13 @@ const OUTPUT_PATH: &str = "/RustTracerChallenge/outputs/debug/output.ppm"; // TO
                                                                  // different platforms
 
 fn main() {
-    println!("Hello, world! Creating projectile");
+    println!("Hello, world! Rendering projectile");
+    let start = SystemTime::now();
     create_projectile();
+    let end = SystemTime::now();
+    let duration = end.duration_since(start).unwrap();
+    print!("Render took {} seconds", duration.as_secs());
+    
 }
 
 fn create_projectile() {
@@ -39,7 +46,6 @@ fn create_projectile() {
         projectile = engine::tick(&environment, &projectile); 
 
         let pos = projectile.get_position();
-        print!("projectile {pos:?}\n\n");
 
         projectile_path.push(projectile.get_position());
         if tuples::is_point_at_or_below_ground(&projectile.get_position()) {
@@ -62,7 +68,7 @@ fn create_projectile() {
             }
         }
     }
-
+     
     let ppm = canvas_to_ppm(&mut my_canvas);
     fs::write(String::from_str(dirs::home_dir().unwrap().as_os_str().to_str().unwrap()).unwrap() + OUTPUT_PATH, ppm).expect("Unable to write to file"); // bruh
 }
