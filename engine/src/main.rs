@@ -1,14 +1,12 @@
 use canvas::{canvas_to_ppm, Canvas};
 use projectile::{Projectile, tick, Environment};
-use std::alloc::System;
 use std::fs;
-use std::env;
 use std::str::FromStr;
 use std::time::SystemTime;
 use dirs;
 use color::Color;
 use rand::{self, Rng};
-use tuples::{create_point, scalar_muplitplication, Tuple};
+use tuples::{scalar_muplitplication};
 
 
 const CANVAS_WIDTH: usize = 2000;
@@ -47,8 +45,6 @@ fn create_projectile() {
     loop {
         projectile = tick(&environment, &projectile); 
 
-        let pos = projectile.get_position();
-
         projectile_path.push(projectile.get_position());
         if tuples::is_point_at_or_below_ground(&projectile.get_position()) {
             break;
@@ -75,13 +71,6 @@ fn create_projectile() {
     fs::write(String::from_str(dirs::home_dir().unwrap().as_os_str().to_str().unwrap()).unwrap() + OUTPUT_PATH, ppm).expect("Unable to write to file"); // bruh
 }
 
-
-
-fn within_range(a:usize, b:usize) -> bool {
-    if a.abs_diff(b) > 2 {return true}
-    return false;
-
-}
 
 fn write_random_ppm()  {
 
