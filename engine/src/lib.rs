@@ -91,9 +91,7 @@ mod tests {
 
         assert!(projectile_cmp(&projectile_prime, &proj_expected));
 
-
     }
-
 
     #[test]
     #[should_panic]
@@ -110,7 +108,6 @@ mod tests {
         let velocity = create_point(1.0, 1.0, 1.0);
         Projectile::new(position, velocity);
     }
-
 
     #[test]
     fn test_tick() {

@@ -1,0 +1,11 @@
+[package]
+name = "rusttracer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tuples = {path = "../tuples"}
+color = {path = "../color"}
+canvas = {path = "../canvas"}
+rand = "0.8.4"
+
