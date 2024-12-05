@@ -30,6 +30,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "engine"
+version = "0.1.0"
+dependencies = [
+ "tuples",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -109,6 +116,7 @@ version = "0.1.0"
 dependencies = [
  "canvas",
  "color",
+ "engine",
  "rand",
  "tuples",
 ]

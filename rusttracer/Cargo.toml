@@ -7,5 +7,6 @@ edition = "2021"
 tuples = {path = "../tuples"}
 color = {path = "../color"}
 canvas = {path = "../canvas"}
+engine = {path = "../engine"}
 rand = "0.8.4"
 
