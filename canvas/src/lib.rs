@@ -1,7 +1,9 @@
 use tuples::Tuple;
+use std::cmp;
 use color::Color;
 
 const LINE_SIZE: usize = 70;
+const MAXIMUM_COLOUR_VALUE: usize = 255;
 
 pub struct Canvas {
     width: usize,
@@ -34,45 +36,57 @@ pub fn scale_pixel(value: f32, max: usize) -> usize {
 }
 
 pub fn canvas_to_ppm(canvas: &mut Canvas) -> String {
+
     let mut buf = canvas_to_ppm_header(canvas);
-    let mut split: usize = 0;
-    let mut pixel_string = String::new();
-    let mut roll_over_string = String::new();
+    let mut pixel_vec = Vec::new();
+
     for y in 0..canvas.height {
         for x in 0..canvas.width {
-        
-            buf.push_str(roll_over_string.as_str());
-            pixel_string = format!("{0} {1} {2}", 
-                scale_pixel(canvas.pixels[y][x].red(), 255),
-                scale_pixel(canvas.pixels[y][x].green(), 255),
-                scale_pixel(canvas.pixels[y][x].blue(), 255),
-            );
-            split = split + pixel_string.chars().count();
-            if split >= LINE_SIZE {
-                let roll_over_len = split - LINE_SIZE;
+            let red_float = scale_pixel(canvas.pixels[y][x].red(),MAXIMUM_COLOUR_VALUE);
+            let green_float = scale_pixel(canvas.pixels[y][x].green(),MAXIMUM_COLOUR_VALUE);
+            let blue_float = scale_pixel(canvas.pixels[y][x].blue(),MAXIMUM_COLOUR_VALUE);
 
-                println!("Split counter is at :{split}\n");
+            let red_float_str = format!("{0}", red_float);
+            let green_float_str = format!("{0}", green_float);
+            let blue_float_str = format!("{0}", blue_float);
 
-                println!("Print the pixel sting:");
-                println!("{pixel_string}\n");
+            pixel_vec.push(red_float_str);
+            pixel_vec.push(green_float_str);
+            pixel_vec.push(blue_float_str)
+        }
+    } 
 
-                roll_over_string = pixel_string.split_off(pixel_string.len() - roll_over_len);
-                roll_over_string.push(' ');
-                println!("Print the roll over string");
-                println!("{roll_over_string}\n");
-                buf.push('\n');
-                split = 0;
-                continue;
-            } else {
-               roll_over_string.clear(); 
-                
-            }
-            buf.push_str(&pixel_string);         
-            if x + 1 != canvas.width {buf.push_str(" ")}
-        } 
-        buf.push('\n');
-        split = 0;
+    let max_number_of_pixels_per_line = canvas.width * 3;
+    let mut current_pixels_per_line = 0;
+    let mut current_line_length = 0;
+
+    for (i,pixel) in pixel_vec.iter().enumerate() {
+        let pixel_length = pixel.chars().count();
+
+        buf.push_str(&pixel);
+
+        current_pixels_per_line = current_pixels_per_line + 1;
+        current_line_length = current_line_length + pixel_length;
+
+        let mut next_pixel_size = 0;
+        if i + 1 < pixel_vec.len() {
+            next_pixel_size = pixel_vec[i + 1].chars().count();
+        }
+    
+
+        if current_pixels_per_line == max_number_of_pixels_per_line  {
+            buf.push('\n');
+            current_pixels_per_line = 0;
+            current_line_length = 0;
+        } else if current_line_length + next_pixel_size >= LINE_SIZE{
+            buf.push('\n');
+            current_line_length = 0;
+        } else {
+            buf.push(' ');
+            current_line_length = current_line_length + 1;
+        }
     }
+
     return buf;
 }
 
@@ -132,6 +146,6 @@ mod tests {
         }
 
         let ppm = canvas_to_ppm(&mut canvas);
-        assert_eq!(ppm, "P3\n10 2\n255\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n");
+        assert_eq!(ppm, "P3\n10 2\n255\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n153 255 204 153 255 204 153 255 204 153 255 204 153\n");
     }
 }
