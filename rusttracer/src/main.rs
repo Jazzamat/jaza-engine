@@ -1,5 +1,8 @@
 use canvas::{canvas_to_ppm, Canvas};
 use std::fs;
+use std::env;
+use std::str::FromStr;
+use dirs;
 use color::Color;
 use rand::{self, Rng};
 use tuples::{create_point, scalar_muplitplication, Tuple};
@@ -8,9 +11,10 @@ use engine;
 const CANVAS_WIDTH: usize = 2000;
 const CANVAS_HEIGHT: usize = 1000;
 
-const OUTPUT_PATH: &str = "/Users/omer/RustTracerChallenge/outputs/debug/output.ppm"; // TODO you can make this
+const OUTPUT_PATH: &str = "/RustTracerChallenge/outputs/debug/output.ppm"; // TODO you can make this
                                                                  // env::home_dir later to support
                                                                  // different platforms
+
 fn main() {
     println!("Hello, world! Creating projectile");
     create_projectile();
@@ -60,8 +64,10 @@ fn create_projectile() {
     }
 
     let ppm = canvas_to_ppm(&mut my_canvas);
-    fs::write(OUTPUT_PATH, ppm).expect("Unable to write to file");
+    fs::write(String::from_str(dirs::home_dir().unwrap().as_os_str().to_str().unwrap()).unwrap() + OUTPUT_PATH, ppm).expect("Unable to write to file"); // bruh
 }
+
+
 
 fn within_range(a:usize, b:usize) -> bool {
     if a.abs_diff(b) > 2 {return true}
@@ -89,6 +95,6 @@ fn write_random_ppm()  {
     }
 
     let ppm = canvas::canvas_to_ppm(&mut my_canvas);
-    fs::write(OUTPUT_PATH, ppm).expect("Unable to write to file");
+    fs::write(String::from_str(dirs::home_dir().unwrap().as_os_str().to_str().unwrap()).unwrap() + OUTPUT_PATH, ppm).expect("Unable to write to file"); // bruh
 
 }

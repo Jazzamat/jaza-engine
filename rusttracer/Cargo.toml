@@ -9,4 +9,5 @@ color = {path = "../color"}
 canvas = {path = "../canvas"}
 engine = {path = "../engine"}
 rand = "0.8.4"
+dirs = "5.0.1"
 
