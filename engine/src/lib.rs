@@ -13,6 +13,10 @@ impl Projectile {
         if is_point(&velocity) {panic!("Velocity cannot be a point");}
         Projectile {position, velocity}
     }
+
+    pub fn get_position(&self) -> Tuple {
+        self.position
+    }
 }
 
 pub fn projectile_cmp(a: &Projectile, b: &Projectile) -> bool {
@@ -35,7 +39,6 @@ impl Environment {
 
 pub fn tick(env: &Environment, proj: &Projectile) -> Projectile {
     let position = add(&proj.position, &proj.velocity);
-    println!("POSITION: {position:?}");
     let velocity = add(&add(&env.gravity, &env.wind), &proj.velocity);
     return Projectile::new(position, velocity);
 }
@@ -86,9 +89,6 @@ mod tests {
         let velocity = create_vector(1.0, 1.0, 1.0);
         let proj_expected = Projectile::new(position, velocity);
 
-        println!("EXPECTED: {proj_expected:?}");
-        println!("ACTUAL: {projectile_prime:?}");
-
         assert!(projectile_cmp(&projectile_prime, &proj_expected));
 
     }
@@ -125,8 +125,6 @@ mod tests {
 
         let proj_prime = tick(&env, &proj);
         let proj_prime = tick(&env, &proj_prime);
-        println!("Initial: {proj:?}");
-        println!("Prime: {proj_prime:?}");
 
         assert!(projectile_cmp(&proj_prime,&Projectile::new(position_prime, velocity_prime)))
     }
@@ -145,7 +143,6 @@ mod tests {
         let position_prime = create_point(0.0, 0.0, 0.0);
         let velocity_prime = create_vector(0.0, -20.0, 0.0);
 
-        println!("LOOPINT");
 
         let mut proj_prime = tick(&env, &proj);
         loop {
@@ -153,14 +150,11 @@ mod tests {
             // make proj_prime mutable. Why? its because of lexical scope instead of dynamic scope
             // of "loop"
 
-            println!("Prime: {proj_prime:?}");
             if is_point_at_or_below_ground(&proj_prime.position) {
                 break;
             }
         } 
         // the above loop breaking means that the test works
         
-        println!("Initial: {proj:?}");
-        println!("Prime: {proj_prime:?}");
     }
 }
