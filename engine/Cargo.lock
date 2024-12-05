@@ -60,6 +60,11 @@ dependencies = [
 name = "engine"
 version = "0.1.0"
 dependencies = [
+ "canvas",
+ "color",
+ "dirs",
+ "projectile",
+ "rand",
  "tuples",
 ]
 
@@ -72,18 +77,6 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
-]
-
-[[package]]
-name = "jaza-engine"
-version = "0.1.0"
-dependencies = [
- "canvas",
- "color",
- "dirs",
- "engine",
- "rand",
- "tuples",
 ]
 
 [[package]]
@@ -124,6 +117,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37d3544b3f2748c54e147655edb5025752e2303145b5aefb3c3ea2c78b973bb0"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "projectile"
+version = "0.1.0"
+dependencies = [
+ "tuples",
 ]
 
 [[package]]

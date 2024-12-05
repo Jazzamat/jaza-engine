@@ -1,5 +1,5 @@
 [package]
-name = "jaza-engine"
+name = "engine"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 tuples = {path = "../tuples"}
 color = {path = "../color"}
 canvas = {path = "../canvas"}
-engine = {path = "../engine"}
+projectile = {path = "../projectile"}
 rand = "0.8.4"
 dirs = "5.0.1"
 

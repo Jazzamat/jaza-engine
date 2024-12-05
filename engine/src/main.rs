@@ -1,4 +1,5 @@
 use canvas::{canvas_to_ppm, Canvas};
+use projectile::{Projectile, tick, Environment};
 use std::alloc::System;
 use std::fs;
 use std::env;
@@ -8,16 +9,17 @@ use dirs;
 use color::Color;
 use rand::{self, Rng};
 use tuples::{create_point, scalar_muplitplication, Tuple};
-use engine;
+
 
 const CANVAS_WIDTH: usize = 2000;
 const CANVAS_HEIGHT: usize = 1000;
 
-const OUTPUT_PATH: &str = "/RustTracerChallenge/outputs/debug/output.ppm"; // TODO you can make this
+const OUTPUT_PATH: &str = "/jaza-engine/outputs/debug/output.ppm"; // TODO you can make this
                                                                  // env::home_dir later to support
                                                                  // different platforms
 
 fn main() {
+
     println!("Hello, world! Rendering projectile");
     let start = SystemTime::now();
     create_projectile();
@@ -32,18 +34,18 @@ fn create_projectile() {
     let mut velocity = tuples::normalization(&tuples::create_vector(1.0, 1.8, 0.0));
     velocity = scalar_muplitplication(velocity, 11.25);
     
-    let mut projectile = engine::Projectile::new(start_point, velocity);
+    let mut projectile = Projectile::new(start_point, velocity);
 
     let gravity = tuples::create_vector(0.0, -0.1, 0.0);
     let wind = tuples::create_vector(-0.01, 0.0, 0.0);
-    let environment = engine::Environment::new(gravity, wind);
+    let environment = Environment::new(gravity, wind);
 
     let mut my_canvas = Canvas::new(CANVAS_WIDTH,CANVAS_HEIGHT);
 
     let mut projectile_path: Vec<tuples::Tuple> = Vec::new();
 
     loop {
-        projectile = engine::tick(&environment, &projectile); 
+        projectile = tick(&environment, &projectile); 
 
         let pos = projectile.get_position();
 
