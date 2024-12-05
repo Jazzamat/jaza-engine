@@ -1,0 +1,13 @@
+[package]
+name = "jaza-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tuples = {path = "../tuples"}
+color = {path = "../color"}
+canvas = {path = "../canvas"}
+engine = {path = "../engine"}
+rand = "0.8.4"
+dirs = "5.0.1"
+
