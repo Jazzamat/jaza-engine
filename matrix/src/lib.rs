@@ -49,21 +49,22 @@ impl PartialEq<Matrix4> for Matrix4 {
     }
 } 
 
-pub fn multiply_tuple_4(matrix_a: Matrix4, tuple: Tuple) -> Matrix4 {
-    let mut result_values = [0.0; 16];
+pub fn multiply_tuple_4(matrix_a: Matrix4, tuple: Tuple) -> Tuple {
+    let mut result_values = [0.0; 4];
     let a = matrix_a.entries;
-    let b = tuple.as_tuple();
+    let b = tuple.as_array();
 
 
     // hardcoding indices since we know the size and indices
     // row 1
-    result_values[0] = a[0]*b[0] + a[1]*b[4] + a[2]*b[8] + a[3]*b[12];
-    result_values[1] = a[0]*b[1] + a[1]*b[5] + a[2]*b[9] + a[3]*b[13];
-    result_values[2] = a[0]*b[2] + a[1]*b[6] + a[2]*b[10] + a[3]*b[14];
-    result_values[3] = a[0]*b[3] + a[1]*b[7] + a[2]*b[11] + a[3]*b[15];
-        
+    result_values[0] = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+    result_values[1] = a[4]*b[0] + a[5]*b[1] + a[6]*b[2] + a[7]*b[3];
+    result_values[2] = a[8]*b[0] + a[9]*b[1] + a[10]*b[2] + a[11]*b[3];
+    result_values[3] = a[12]*b[0] + a[13]*b[1] + a[14]*b[2] + a[15]*b[3];
 
+    Tuple::from_values(result_values)
 }
+
 pub fn multiply_4(matrix_a: Matrix4, matrix_b: Matrix4) -> Matrix4 {
     let mut result_values = [0.0; 16]; // does init all to 0 cost too much?
     let a = matrix_a.entries;
@@ -156,11 +157,11 @@ impl PartialEq<Matrix2> for Matrix2 {
 
 #[cfg(test)]
 mod tests {
-    use std::panic::RefUnwindSafe;
 
     use tuples::Tuple;
 
     use crate::multiply_4;
+    use crate::multiply_tuple_4;
     use crate::Matrix4;
     use crate::Matrix3;
     use crate::Matrix2;
@@ -227,12 +228,12 @@ mod tests {
     #[test]
     fn test_mupliply_tuple_4() {
 
-        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
-        let tuple = Tuple::new(1.0, 2.0, 3.0, true);
+        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,2.0,4.0,4.0,2.0,8.0,6.0,4.0,1.0,0.0,0.0,0.0,1.0]); 
+        let tuple = Tuple::new(1.0, 2.0, 3.0, 1.0);
 
         let result = multiply_tuple_4(matrix_a, tuple);
 
-        let expected = Matrix4::new([20.0,22.0,50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0, 26.0, 46.0, 42.0 ]); 
+        let expected = Tuple::from_values([18.0,24.0,33.0,1.0]);
 
         assert_eq!(result, expected);
 

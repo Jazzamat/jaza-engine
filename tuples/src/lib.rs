@@ -16,6 +16,11 @@ impl Tuple {
     pub fn new(x:f32,y:f32,z:f32,w:f32) -> Self{
         Tuple{x,y,z,w}
     }
+
+    pub fn from_values(values: [f32;4]) -> Self {
+        Tuple{x:values[0], y:values[1], z:values[2], w:values[3]}
+    }
+
     pub fn x(&self) -> f32 {
         self.x
     }
@@ -71,7 +76,6 @@ pub fn float_cmp(a: f32, b:f32) -> bool {
         return false;
     }
 }
-
 
 pub fn is_point_at_or_below_ground(point: &Tuple) -> bool {
     if is_vector(&point) {panic!("This function needs a point, not vectors");}
