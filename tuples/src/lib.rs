@@ -9,11 +9,11 @@ pub struct Tuple {
     x: f32,
     y: f32,
     z: f32,
-    w: bool // true if is a point otherwise its a vector
+    w: f32 // true if is a point otherwise its a vector
 }
 
 impl Tuple {
-    pub fn new(x:f32,y:f32,z:f32,w:bool) -> Self{
+    pub fn new(x:f32,y:f32,z:f32,w:f32) -> Self{
         Tuple{x,y,z,w}
     }
     pub fn x(&self) -> f32 {
@@ -28,40 +28,38 @@ impl Tuple {
         self.z
     }
 
+    pub fn w(&self) -> f32 {
+        self.w
+    }
+
     pub fn eq(&self, other: &Tuple) -> bool {
         float_cmp(self.x, other.x) && 
         float_cmp(self.y,other.y) &&
         float_cmp(self.z,other.z) && 
-        self.w == other.w 
+        float_cmp(self.w,other.w)  
     }
 
     pub fn as_array(&self) -> [f32;4] {
-        let w: f32;
-        if self.w {
-            w =1.0
-        } else {
-            w = 0.0
-        };
-        [self.x, self.y, self.z, w]
+        [self.x, self.y, self.z, self.w]
     }
 }
 
-impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,bool) {
+impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,f32) {
 
     fn eq(&self, other: &Tuple) -> bool {
         float_cmp(self.0, other.x) && 
         float_cmp(self.1,other.y) &&
         float_cmp(self.2,other.z) && 
-        self.3 == other.w 
+        float_cmp(self.3,other.w)
     }
 }
 
-impl<'a, 'b> PartialEq<(f32,f32,f32,bool)> for Tuple {
-    fn eq(&self, other: &(f32,f32,f32,bool)) -> bool {
+impl<'a, 'b> PartialEq<(f32,f32,f32,f32)> for Tuple {
+    fn eq(&self, other: &(f32,f32,f32,f32)) -> bool {
         float_cmp(self.x,other.0) &&
         float_cmp(self.y,other.1) &&
         float_cmp(self.z,other.2) &&
-        self.w == other.3
+        float_cmp(self.w,other.3)
     }
 }
 
@@ -85,7 +83,7 @@ pub fn tuple_cmp(a: &Tuple, b: &Tuple) -> bool {
     float_cmp(a.x, b.x) &&
     float_cmp(a.y, b.y) &&
     float_cmp(a.z, b.z) &&
-    xand(a.w, b.w)
+    float_cmp(a.w, b.w)
 }
 
 pub fn xand(a: bool, b: bool) -> bool {
@@ -101,11 +99,11 @@ pub fn xand(a: bool, b: bool) -> bool {
 }
 
 pub fn create_point(x:f32,y:f32,z:f32) -> Tuple {
-    Tuple{x,y,z,w:true} // dumbest thing ever so far // why?
+    Tuple{x,y,z,w:1.0} // dumbest thing ever so far // why?
 }
 
 pub fn create_vector(x:f32,y:f32,z:f32) -> Tuple {
-    Tuple{x,y,z,w:false} 
+    Tuple{x,y,z,w:0.0} 
 }
 
 pub fn add(a: &Tuple, b: &Tuple) -> Tuple {
@@ -113,7 +111,7 @@ pub fn add(a: &Tuple, b: &Tuple) -> Tuple {
         x : a.x + b.x,
         y : a.y + b.y,
         z : a.z + b.z,
-        w : (a.w || b.w)
+        w : a.w + b.w
     };
     result
 }
@@ -123,13 +121,7 @@ pub fn subtract(a: &Tuple, b: &Tuple) -> Tuple {
         x : a.x - b.x,
         y : a.y - b.y,
         z : a.z - b.z,
-        w : a.w ^ b.w
-        // truth table for vectors and points (XOR)
-        // a     b   RESULT
-        // 0     0   0
-        // 1     0   1
-        // 0     1   1
-        // 1     1   0 
+        w : a.w - b.w
     };
     result
 }
@@ -139,13 +131,13 @@ pub fn negate(tuple: Tuple) -> Tuple {
         x : -(tuple.x),
         y : -(tuple.y),
         z : -(tuple.z),
-        w : !tuple.w
+        w : -(tuple.w)
     };
     return result;
 }
 
 pub fn dot_product(a:&Tuple, b:&Tuple) -> f32 {
-    if a.w || b.w {
+    if a.w == 1.0 || b.w == 1.0 {
         panic!("Can't dot product a point");
     }
     return a.x * b.x +
@@ -155,7 +147,7 @@ pub fn dot_product(a:&Tuple, b:&Tuple) -> f32 {
 
 
 pub fn cross_product(a: &Tuple, b: &Tuple) -> Tuple {
-    if a.w || b.w {
+    if a.w == 1.0 || b.w == 1.0 {
         panic!("Can't cross product a point -> a is a point?: {aw:?}, b is a point?: {bw:?}", aw = a.w, bw = b.w);
     }
     return create_vector(
@@ -171,7 +163,7 @@ pub fn scalar_muplitplication(tuple: Tuple, scalar: f32) -> Tuple { // TODO woul
         x: tuple.x * scalar,
         y: tuple.y * scalar,
         z: tuple.z * scalar,
-        w: tuple.w && scalar.is_sign_positive(),
+        w: tuple.w * scalar
     };
     return result;
 }
@@ -181,7 +173,8 @@ pub fn scalar_division(tuple: Tuple, scalar: f32) -> Tuple { // just because
         x: tuple.x / scalar,
         y: tuple.y / scalar,
         z: tuple.z / scalar,
-        w: tuple.w && scalar.is_sign_positive(),
+        w: tuple.w / scalar,
+
     };
     return result;
 }
@@ -191,13 +184,13 @@ pub fn hadamard_product(a: &Tuple, b: &Tuple) -> Tuple {
         a.x * b.x,
         a.y * b.y,
         a.z * b.z,
-        a.w && b.w
+        a.w * b.w
     )
 }
 
 pub fn is_point(tuple: &Tuple) -> bool {
     // if last element of tuple is 1 its a point otherwise its a vector
-    if tuple.w {
+    if tuple.w == 1.0 {
         return true;
     }
     return false
@@ -205,7 +198,7 @@ pub fn is_point(tuple: &Tuple) -> bool {
 
 pub fn is_vector(tuple: &Tuple) -> bool {
     // if last element of tuple is 1 its a point otherwise its a vector
-    if tuple.w {
+    if tuple.w == 1.0 {
         return false;
     }
     return true;
@@ -222,7 +215,7 @@ pub fn normalization(tuple: &Tuple) -> Tuple {
         x: tuple.x/magnitude,
         y: tuple.y/magnitude,
         z: tuple.z/magnitude,
-        w: false
+        w: tuple.w/magnitude
     };
     result
 }
@@ -233,22 +226,22 @@ mod tests {
     use super::*;
     #[test]
     fn test_1_is_point() {
-        let tuple = Tuple{ x:4.3, y:-4.2, z:3.1, w:true};
+        let tuple = Tuple{ x:4.3, y:-4.2, z:3.1, w:1.0};
         assert_eq!(tuple.x, 4.3);
         assert_eq!(tuple.y, -4.2);
         assert_eq!(tuple.z, 3.1);
-        assert!(tuple.w);
+        assert_eq!(tuple.w, 1.0);
         assert!(is_point(&tuple));
         assert!(!is_vector(&tuple))
     }
 
     #[test]
     fn test_2_is_not_a_point() {
-        let tuple = Tuple{ x:4.3, y:-4.2, z:3.1, w:false};
+        let tuple = Tuple{ x:4.3, y:-4.2, z:3.1, w:0.0};
         assert_eq!(tuple.x, 4.3);
         assert_eq!(tuple.y, -4.2);
         assert_eq!(tuple.z, 3.1);
-        assert!(!tuple.w);
+        assert_eq!(tuple.w, 0.0);
         assert!(!is_point(&tuple));
         assert!(is_vector(&tuple))
     }
@@ -256,21 +249,21 @@ mod tests {
     #[test]
     fn test_create_point() {
         let point : Tuple = create_point(4.0, -4.0, 3.0);
-        assert_eq!(point, (4.0,-4.0,3.0,true));
+        assert_eq!(point, (4.0,-4.0,3.0,1.0));
     }
 
     #[test]
     fn test_create_vector() {
         let point : Tuple = create_vector(4.0, -4.0, 3.0);
-        assert_eq!(point, (4.0,-4.0,3.0, false));
+        assert_eq!(point, (4.0,-4.0,3.0, 0.0));
     }
 
     #[test]
     fn test_addition_of_tuples() {
-        let a1 = Tuple{ x:3.0, y:-2.0, z:5.0, w:true};
-        let a2 = Tuple{ x:-2.0, y:3.0, z:1.0, w:false};
+        let a1 = Tuple{ x:3.0, y:-2.0, z:5.0, w:1.0};
+        let a2 = Tuple{ x:-2.0, y:3.0, z:1.0, w:0.0};
         let result = add(&a1, &a2);
-        assert_eq!(result, (1.0,1.0,6.0,true));
+        assert_eq!(result, (1.0,1.0,6.0,1.0));
     }
 
     #[test]
@@ -278,7 +271,7 @@ mod tests {
         let a1 = create_point(3.0, -2.0, 5.0);
         let a2 = create_point(-2.0, 3.0, 1.0);
         let result = add(&a1, &a2);
-        assert_eq!(result, create_point(1.0, 1.0, 6.0));
+        assert_eq!(result, (1.0, 1.0, 6.0, 2.0)); // w: 2.0 make sense?
     }
 
     #[test]
@@ -286,7 +279,7 @@ mod tests {
         let a1 = create_point(3.0, -2.0, 5.0);
         let a2 = create_vector(-2.0, 3.0, 1.0);
         let result = add(&a1, &a2);
-        assert_eq!(result, create_point(1.0, 1.0, 6.0));
+        assert_eq!(result, (1.0, 1.0, 6.0, 1.0));
     }
 
     #[test]
@@ -294,7 +287,7 @@ mod tests {
         let a1 = create_point(3.0, 2.0, 1.0);
         let a2 = create_point(5.0, 6.0, 7.0);
         let result = subtract(&a1, &a2);
-        assert_eq!(result, (-2.0,-4.0,-6.0,false));
+        assert_eq!(result, (-2.0,-4.0,-6.0,0.0));
     }
 
     #[test]
@@ -302,7 +295,7 @@ mod tests {
         let p = create_point(3.0, 2.0, 1.0);
         let v = create_vector(5.0, 6.0, 7.0);
         let result = subtract(&p, &v);
-        assert_eq!(result,(-2.0,-4.0,-6.0,true));
+        assert_eq!(result,(-2.0,-4.0,-6.0,1.0));
 
     }
 
@@ -311,7 +304,7 @@ mod tests {
         let v1 = create_vector(3.0, 2.0, 1.0);
         let v2 = create_vector(5.0, 6.0, 7.0);
         let result = subtract(&v1, &v2);
-        assert_eq!(result, (-2.0,-4.0,-6.0,false));
+        assert_eq!(result, (-2.0,-4.0,-6.0,0.0));
     }
 
     #[test]
@@ -319,35 +312,35 @@ mod tests {
         let zero = create_vector(0.0, 0.0, 0.0);
         let v = create_vector(1.0, -2.0, 3.0);
         let result = subtract(&zero, &v);
-        assert_eq!(result, (-1.0,2.0,-3.0,false));
+        assert_eq!(result, (-1.0,2.0,-3.0,0.0));
     }
 
     #[test]
     fn test_negation_of_a_tuple() {
-        let a = Tuple {x:1.0, y:-2.0, z:3.0, w:false};
+        let a = Tuple {x:1.0, y:-2.0, z:3.0, w:0.0};
         let result = negate(a);
-        assert_eq!(result, (-1.0,2.0,-3.0,true));
+        assert_eq!(result, (-1.0,2.0,-3.0,0.0));
     }
 
     #[test]
     fn test_muplitplying_by_a_scalar() {
-        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:false};
+        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:0.0};
         let result = scalar_muplitplication(a, 3.5);
-        assert_eq!(result, (3.5,-7.0, 10.5, false));
+        assert_eq!(result, (3.5,-7.0, 10.5, 0.0));
     }
 
     #[test]
     fn test_muplitplying_by_a_scalar_2() {
-        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:false};
+        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:0.0};
         let result = scalar_muplitplication(a, 0.5);
-        assert_eq!(result, (0.5,-1.0, 1.5, false));
+        assert_eq!(result, (0.5,-1.0, 1.5, 0.0));
     }
 
     #[test]
     fn test_dividing_by_a_scalar() {
-        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:false};
+        let a = Tuple {x: 1.0, y:-2.0, z:3.0, w:0.0};
         let result = scalar_division(a, 2.0);
-        assert_eq!(result, (0.5,-1.0, 1.5, false));
+        assert_eq!(result, (0.5,-1.0, 1.5, 0.0));
     }
 
     #[test]
@@ -468,7 +461,7 @@ mod tests {
         let a = create_point(1.0, 0.2, 0.4);
         let b = create_point(0.9, 1.0, 0.1);
         let result = hadamard_product(&a, &b);
-        assert_eq!(result, (0.9,0.2,0.04, true));
+        assert_eq!(result, (0.9,0.2,0.04, 1.0)); // should w:1.0?
     }
 
     #[test]

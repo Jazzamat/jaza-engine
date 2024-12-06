@@ -9,7 +9,7 @@ pub struct Color {
 
 impl Color {
     pub fn new(red: f32, green: f32, blue: f32) -> Self {
-        let tuple = Tuple::new(red, green, blue, false);
+        let tuple = Tuple::new(red, green, blue, 0.0);
         Color {tuple}
     }
 
