@@ -13,6 +13,8 @@ pub fn float_cmp(a: f32, b:f32) -> bool {
     }
 }
 
+// ==================================== MATRIX 4 =================================== // 
+
 #[derive(Debug)]
 pub struct Matrix4 {
     entries: [f32;16] // find the most optimal way to have a 2d array in rust 
@@ -100,6 +102,44 @@ pub fn multiply_4(matrix_a: Matrix4, matrix_b: Matrix4) -> Matrix4 {
     return Matrix4::new(result_values);
 }
 
+pub fn identity_4() -> Matrix4 {
+    let mut values = [0.0; 16]; 
+
+    values[0] = 1.0;
+    values[5] = 1.0;
+    values[10] = 1.0;
+    values[15] = 1.0;
+
+    // TODO see if hard coding the whole array would be more performant than individually settting.
+
+    Matrix4::new(values)
+}
+
+pub fn transpose_4(matrix: Matrix4) -> Matrix4 {
+    let old_values = matrix.entries;
+    let mut new_values = [0.0;16];
+
+    new_values[0] = old_values[0];
+    new_values[1] = old_values[4];
+    new_values[2] = old_values[8];
+    new_values[3] = old_values[12];
+    new_values[4] = old_values[1];
+    new_values[5] = old_values[5];
+    new_values[6] = old_values[9];
+    new_values[7] = old_values[13];
+    new_values[8] = old_values[2];
+    new_values[9] = old_values[6];
+    new_values[10] = old_values[10];
+    new_values[11] = old_values[14];
+    new_values[12] = old_values[3];
+    new_values[13] = old_values[7];
+    new_values[14] = old_values[11];
+    new_values[15] = old_values[15];
+
+    Matrix4::new(new_values)
+}
+
+// ==================================== MATRIX 3 =================================== // 
 
 pub struct Matrix3 {
     entries: [f32;9] // find the most optimal way to have a 2d array in rust
@@ -129,6 +169,7 @@ impl PartialEq<Matrix3> for Matrix3 {
     }
 } 
 
+// ==================================== MATRIX 2 =================================== // 
 
 pub struct Matrix2 {
     entries: [f32;4] // find the most optimal way to have a 2d array in rust
@@ -153,15 +194,18 @@ impl PartialEq<Matrix2> for Matrix2 {
     }
 } 
 
-
+// ==================================== TESTS =================================== // 
 
 #[cfg(test)]
 mod tests {
 
+
     use tuples::Tuple;
 
+    use crate::identity_4;
     use crate::multiply_4;
     use crate::multiply_tuple_4;
+    use crate::transpose_4;
     use crate::Matrix4;
     use crate::Matrix3;
     use crate::Matrix2;
@@ -224,21 +268,42 @@ mod tests {
 
     }
 
-
     #[test]
     fn test_mupliply_tuple_4() {
-
         let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,2.0,4.0,4.0,2.0,8.0,6.0,4.0,1.0,0.0,0.0,0.0,1.0]); 
         let tuple = Tuple::new(1.0, 2.0, 3.0, 1.0);
-
         let result = multiply_tuple_4(matrix_a, tuple);
-
         let expected = Tuple::from_values([18.0,24.0,33.0,1.0]);
-
         assert_eq!(result, expected);
-
     }
 
+    #[test]
+    fn test_mupltiply_identity_matrix_4() {
+        let matrix_a = Matrix4::new([0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0,16.0,4.0, 8.0, 16.0, 32.0]); 
+        let identity_matrix = identity_4();
 
+        let result = multiply_4(matrix_a, identity_matrix);
 
+        assert_eq!(result, Matrix4::new([0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0,16.0,4.0, 8.0, 16.0, 32.0]));
+    }
+    
+    #[test]
+    fn test_mupltiply_identity_matrix_4_with_tuple() {
+        let tuple = Tuple::new(1.0, 2.0, 3.0, 4.0);
+        let identity_matrix = identity_4();
+
+        let result = multiply_tuple_4(identity_matrix, tuple);
+
+        assert_eq!(result, Tuple::new(1.0, 2.0, 3.0, 4.0))
+    }
+
+    
+    #[test]
+    fn test_transpose() {
+        let matrix = Matrix4::new([0.0,9.0,3.0,0.0,9.0, 8.0,0.0,8.0, 1.0, 8.0, 5.0, 3.0, 0.0, 0.0, 5.0,8.0]);
+
+        let result = transpose_4(matrix);
+
+        assert_eq!(result, Matrix4::new([0.0,9.0,1.0,0.0,9.0,8.0,8.0,0.0,3.0,0.0,5.0,5.0,0.0,8.0,3.0,8.0]));
+    }
 }
