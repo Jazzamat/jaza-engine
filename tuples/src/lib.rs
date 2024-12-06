@@ -34,6 +34,16 @@ impl Tuple {
         float_cmp(self.z,other.z) && 
         self.w == other.w 
     }
+
+    pub fn as_array(&self) -> [f32;4] {
+        let w: f32;
+        if self.w {
+            w =1.0
+        } else {
+            w = 0.0
+        };
+        [self.x, self.y, self.z, w]
+    }
 }
 
 impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,bool) {
@@ -63,6 +73,7 @@ pub fn float_cmp(a: f32, b:f32) -> bool {
         return false;
     }
 }
+
 
 pub fn is_point_at_or_below_ground(point: &Tuple) -> bool {
     if is_vector(&point) {panic!("This function needs a point, not vectors");}
