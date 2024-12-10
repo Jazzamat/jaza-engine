@@ -169,6 +169,18 @@ pub fn submatrix_4(matrix: &Matrix4, row:usize, column:usize) -> Matrix3 {
     Matrix3::new(new_values)
 }
 
+pub fn minor_4(matrix:&Matrix4, row: usize, column:usize) -> f32 {
+    0.0 // TODO
+}
+
+pub fn cofactor_4(matrix:&Matrix4, row: usize, column:usize) -> f32 {
+    0.0 // TODO
+}
+
+pub fn determinant_4(matrix: &Matrix4) -> f32 {
+    0.0 // TODO
+}
+
 // ==================================== MATRIX 3 =================================== // 
 
 #[derive(Debug)]
@@ -199,7 +211,6 @@ impl PartialEq<Matrix3> for Matrix3 {
             float_cmp(self.entries[8], other.entries[8]) 
     }
 } 
-
 
 pub fn submatrix_3_match(matrix: &Matrix3, row: usize, column: usize) -> Matrix2 {
     let mut new_values = [0.0; 4];
@@ -237,10 +248,22 @@ pub fn submatrix_3(matrix: &Matrix3, row: usize, column: usize) -> Matrix2 {
     Matrix2::new(new_values)
 }
 
-
 pub fn minor_3(matrix: &Matrix3, row: usize, column: usize) -> f32 {
     let submatrix = submatrix_3(matrix, row, column);
     determinant_2(&submatrix)
+}
+
+pub fn cofactor_3(matrix: &Matrix3, row: usize, column: usize) -> f32 {
+    let minor = minor_3(&matrix, row, column);
+    if row + column % 2 == 0 {
+        minor
+    } else {
+        -minor
+    }
+}
+
+pub fn determinant_3(matrix: &Matrix3) -> f32 {
+    0.0
 }
 
 // ==================================== MATRIX 2 =================================== // 
@@ -280,10 +303,14 @@ pub fn determinant_2(matrix: &Matrix2) -> f32 {
 mod tests {
 
     use std::time::SystemTime;
-
     use tuples::Tuple;
+    use crate::cofactor_3;
+    use crate::cofactor_4;
     use crate::determinant_2;
+    use crate::determinant_3;
+    use crate::determinant_4;
     use crate::identity_4;
+    use crate::minor_3;
     use crate::multiply_4;
     use crate::multiply_tuple_4;
     use crate::submatrix_3;
@@ -461,4 +488,52 @@ mod tests {
         println!("submatrix_3 took {} milliseconds", duration.as_millis());
         println!("submatrix_3_match took {} milliseconds", duration_match.as_millis());
     } 
+
+    #[test]
+    fn test_minor_3() {
+        let matrix = Matrix3::new([3.0,5.0,0.0,2.0,-1.0,-7.0, 6.0, -1.0, 5.0]);
+        let minor = minor_3(&matrix, 1, 0);
+        assert_eq!(minor, 25.0);
+    }
+
+    #[test]
+    fn test_cofactor_3() {
+        let matrix = Matrix3::new([3.0,5.0,0.0,2.0,-1.0,-7.0, 6.0, -1.0, 5.0]);
+        let cofactor_a = cofactor_3(&matrix, 0,0);
+        let cofactor_b = cofactor_3(&matrix, 1,0);
+        assert_eq!(cofactor_a, -12.0);
+        assert_eq!(cofactor_b, -25.0);
+    }
+
+
+    #[test]
+    fn test_determinant_3() {
+        let matrix = Matrix3::new([1.0,2.0,6.0,-5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
+        let cofactor_a = cofactor_3(&matrix, 0, 0);
+        let cofactor_b = cofactor_3(&matrix, 0, 1);
+        let cofactor_c = cofactor_3(&matrix, 0, 2);
+        let determinant = determinant_3(&matrix);
+
+        assert_eq!(cofactor_a, 56.0);
+        assert_eq!(cofactor_b, 12.0);
+        assert_eq!(cofactor_c, -46.0);
+        assert_eq!(determinant, -196.0);
+    }
+
+    #[test]
+    fn test_determinant_4() {
+
+        let matrix = Matrix4::new([-2.0,-8.0, 3.0, 5.0,-3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0]);
+        let cofactor_a = cofactor_4(&matrix, 0, 0);
+        let cofactor_b = cofactor_4(&matrix, 0, 1);
+        let cofactor_c = cofactor_4(&matrix, 0, 2);
+        let cofactor_d = cofactor_4(&matrix, 0, 3);
+        let determinant = determinant_4(&matrix);
+
+        assert_eq!(cofactor_a, 690.0);
+        assert_eq!(cofactor_b, 447.0);
+        assert_eq!(cofactor_c, 210.0);
+        assert_eq!(cofactor_d, 51.0);
+        assert_eq!(determinant, -4071.0);
+    }
 }
