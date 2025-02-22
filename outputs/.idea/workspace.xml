@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bf11f72d-4575-4f20-90de-5d67729c0756" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/RustTracerChallenge.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/RustTracerChallenge.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../canvas/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../canvas/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../canvas/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/../canvas/target/.rustc_info.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../canvas/target/debug/libcanvas.d" beforeDir="false" afterPath="$PROJECT_DIR$/../canvas/target/debug/libcanvas.d" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../canvas/target/debug/libcanvas.rlib" beforeDir="false" afterPath="$PROJECT_DIR$/../canvas/target/debug/libcanvas.rlib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../color/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/../color/target/.rustc_info.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../color/target/debug/libcolor.d" beforeDir="false" afterPath="$PROJECT_DIR$/../color/target/debug/libcolor.d" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../color/target/debug/libcolor.rlib" beforeDir="false" afterPath="$PROJECT_DIR$/../color/target/debug/libcolor.rlib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../matrix/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../matrix/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../tuples/target/.rustc_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/../tuples/target/.rustc_info.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../tuples/target/debug/deps/libtuples-92c4a0aff14fcfc5.rmeta" beforeDir="false" afterPath="$PROJECT_DIR$/../tuples/target/debug/deps/libtuples-92c4a0aff14fcfc5.rmeta" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2t4ODpq9uFNHKCpnmUvhP7J0a35" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/omer/jaza-engine/outputs&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="/usr/bin" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bf11f72d-4575-4f20-90de-5d67729c0756" name="Changes" comment="" />
+      <created>1739607763928</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1739607763928</updated>
+      <workItem from="1739607765088" duration="18000" />
+      <workItem from="1739611456244" duration="9000" />
+      <workItem from="1740156542715" duration="4000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

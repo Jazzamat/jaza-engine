@@ -7,9 +7,9 @@ use tuples::Tuple;
 pub fn float_cmp(a: f32, b:f32) -> bool {
     let delta = a - b;
     if delta.abs() < EPSILON {
-        return true;
+        true
     } else { 
-        return false;
+        false
     }
 }
 
@@ -170,22 +170,31 @@ pub fn submatrix_4(matrix: &Matrix4, row:usize, column:usize) -> Matrix3 {
 }
 
 pub fn minor_4(matrix:&Matrix4, row: usize, column:usize) -> f32 {
-    0.0 // TODO
+    let submatrix = submatrix_4(matrix, row, column);
+    determinant_3(&submatrix)
 }
 
 pub fn cofactor_4(matrix:&Matrix4, row: usize, column:usize) -> f32 {
-    0.0 // TODO
+    let minor = minor_4(&matrix, row, column);
+    if row + column % 2 == 0 {
+        minor
+    } else {
+        -minor
+    }
 }
 
 pub fn determinant_4(matrix: &Matrix4) -> f32 {
-    0.0 // TODO
+    matrix.get(0,0) * cofactor_4(matrix, 0,0) +
+        matrix.get(0,1) * cofactor_4(matrix, 0,1) +
+        matrix.get(0,2) * cofactor_4(matrix, 0,2) +
+        matrix.get(0,3) * cofactor_4(matrix, 0,3)
 }
 
 // ==================================== MATRIX 3 =================================== // 
 
 #[derive(Debug)]
 pub struct Matrix3 {
-    entries: [f32;9] // find the most optimal way to have a 2d array in rust
+    entries: [f32;9] // TODO find the most optimal way to have a 2d array in rust
 }
 
 impl Matrix3 {
@@ -263,7 +272,9 @@ pub fn cofactor_3(matrix: &Matrix3, row: usize, column: usize) -> f32 {
 }
 
 pub fn determinant_3(matrix: &Matrix3) -> f32 {
-    0.0
+    matrix.get(0,0) * cofactor_3(matrix,0,0) +
+        matrix.get(0,1) * cofactor_3(matrix,0,1) +
+        matrix.get(0,2) * cofactor_3(matrix , 0, 2)
 }
 
 // ==================================== MATRIX 2 =================================== // 
@@ -276,25 +287,29 @@ pub struct Matrix2 {
 impl Matrix2 {
     pub fn new(values: [f32; 4]) -> Self {
         Matrix2{entries:values}
-    } 
+    }
 
     pub fn get(&self, row: usize, column: usize) -> f32 {
-        self.entries[column + row * 2]        
+        self.entries[column + row * 2]
     }
 }
 
 impl PartialEq<Matrix2> for Matrix2 {
     fn eq(&self, other: &Matrix2) -> bool {
-        float_cmp(self.entries[0], other.entries[0]) && 
-            float_cmp(self.entries[1], other.entries[1]) && 
-            float_cmp(self.entries[2], other.entries[2]) && 
-            float_cmp(self.entries[3], other.entries[3]) 
+        float_cmp(self.entries[0], other.entries[0]) &&
+            float_cmp(self.entries[1], other.entries[1]) &&
+            float_cmp(self.entries[2], other.entries[2]) &&
+            float_cmp(self.entries[3], other.entries[3])
     }
-} 
+}
 
 pub fn determinant_2(matrix: &Matrix2) -> f32 {
     let values = matrix.entries;
     values[0]*values[3] - values[1]*values[2]
+}
+
+pub fn is_invertible_4(matrix: &Matrix4) -> bool {
+    determinant_4(matrix) != 0.0
 }
 
 // ==================================== TESTS =================================== // 
@@ -304,7 +319,7 @@ mod tests {
 
     use std::time::SystemTime;
     use tuples::Tuple;
-    use crate::cofactor_3;
+    use crate::{cofactor_3, is_invertible_4};
     use crate::cofactor_4;
     use crate::determinant_2;
     use crate::determinant_3;
@@ -323,7 +338,7 @@ mod tests {
 
     #[test]
     fn basic_get_4() {
-        let matrix = Matrix4::new([1.0,2.0,3.0,4.0,5.5,6.5,7.5,8.5,9.0,10.0,11.0,12.0,13.5,14.5,15.5,16.5]); 
+        let matrix = Matrix4::new([1.0,2.0,3.0,4.0,5.5,6.5,7.5,8.5,9.0,10.0,11.0,12.0,13.5,14.5,15.5,16.5]);
         assert_eq!(matrix.get(0, 0), 1.0);
         assert_eq!(matrix.get(0, 3), 4.0);
         assert_eq!(matrix.get(1, 0), 5.5);
@@ -335,7 +350,7 @@ mod tests {
 
     #[test]
     fn basic_get_2() {
-        let matrix = Matrix2::new([-3.0, 5.0, 1.0, -2.0]); 
+        let matrix = Matrix2::new([-3.0, 5.0, 1.0, -2.0]);
         assert_eq!(matrix.get(0, 0), -3.0);
         assert_eq!(matrix.get(0, 1), 5.0);
         assert_eq!(matrix.get(1, 0), 1.0);
@@ -344,7 +359,7 @@ mod tests {
 
     #[test]
     fn basic_get_3() {
-        let matrix = Matrix3::new([-3.0, 5.0, 0.0, 1.0, -2.0, -7.0, 0.0, 1.0, 1.0]); 
+        let matrix = Matrix3::new([-3.0, 5.0, 0.0, 1.0, -2.0, -7.0, 0.0, 1.0, 1.0]);
         assert_eq!(matrix.get(0, 0), -3.0);
         assert_eq!(matrix.get(1, 1), -2.0);
         assert_eq!(matrix.get(2, 2), 1.0);
@@ -352,27 +367,27 @@ mod tests {
 
     #[test]
     fn test_equality_4() {
-        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
-        let matrix_b = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
+        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]);
+        let matrix_b = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]);
         assert_eq!(matrix_a, matrix_b);
     }
 
     #[test]
     fn test_inequality_4() {
-        let matrix_a = Matrix4::new([1.0,2.0,1.0,4.0,5.0,6.0,7.0,8.0,2.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
-        let matrix_b = Matrix4::new([1.0,2.0,3.0,4.0,0.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
+        let matrix_a = Matrix4::new([1.0,2.0,1.0,4.0,5.0,6.0,7.0,8.0,2.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]);
+        let matrix_b = Matrix4::new([1.0,2.0,3.0,4.0,0.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]);
         assert_ne!(matrix_a, matrix_b);
     }
 
     #[test]
     fn test_mupliply_4() {
 
-        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]); 
-        let matrix_b = Matrix4::new([-2.0,1.0,2.0,3.0,3.0,2.0,1.0,-1.0,4.0,3.0,6.0,5.0,1.0,2.0,7.0,8.0]); 
+        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0]);
+        let matrix_b = Matrix4::new([-2.0,1.0,2.0,3.0,3.0,2.0,1.0,-1.0,4.0,3.0,6.0,5.0,1.0,2.0,7.0,8.0]);
 
         let result = multiply_4(&matrix_a, &matrix_b);
 
-        let expected = Matrix4::new([20.0,22.0,50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0, 26.0, 46.0, 42.0 ]); 
+        let expected = Matrix4::new([20.0,22.0,50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0, 26.0, 46.0, 42.0 ]);
 
         assert_eq!(result, expected);
 
@@ -380,7 +395,7 @@ mod tests {
 
     #[test]
     fn test_mupliply_tuple_4() {
-        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,2.0,4.0,4.0,2.0,8.0,6.0,4.0,1.0,0.0,0.0,0.0,1.0]); 
+        let matrix_a = Matrix4::new([1.0,2.0,3.0,4.0,2.0,4.0,4.0,2.0,8.0,6.0,4.0,1.0,0.0,0.0,0.0,1.0]);
         let tuple = Tuple::new(1.0, 2.0, 3.0, 1.0);
         let result = multiply_tuple_4(&matrix_a, &tuple);
         let expected = Tuple::from_values([18.0,24.0,33.0,1.0]);
@@ -389,7 +404,7 @@ mod tests {
 
     #[test]
     fn test_mupltiply_identity_matrix_4() {
-        let matrix_a = Matrix4::new([0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0,16.0,4.0, 8.0, 16.0, 32.0]); 
+        let matrix_a = Matrix4::new([0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0,16.0,4.0, 8.0, 16.0, 32.0]);
         let identity_matrix = identity_4();
 
         let result = multiply_4(&matrix_a, &identity_matrix);
@@ -487,7 +502,7 @@ mod tests {
         println!("\n\n TESTING SUBMATRIX PERFORMANCE");
         println!("submatrix_3 took {} milliseconds", duration.as_millis());
         println!("submatrix_3_match took {} milliseconds", duration_match.as_millis());
-    } 
+    }
 
     #[test]
     fn test_minor_3() {
@@ -504,7 +519,6 @@ mod tests {
         assert_eq!(cofactor_a, -12.0);
         assert_eq!(cofactor_b, -25.0);
     }
-
 
     #[test]
     fn test_determinant_3() {
@@ -535,5 +549,24 @@ mod tests {
         assert_eq!(cofactor_c, 210.0);
         assert_eq!(cofactor_d, 51.0);
         assert_eq!(determinant, -4071.0);
+    }
+
+
+    #[test]
+    fn test_is_invertible_4() {
+        let matrix = Matrix4::new([6.0,4.0,4.0,4.0,5.0,5.0,7.0,6.0,4.0,-9.0,3.0,-7.0,9.0,1.0,7.0,-6.0]);
+        let determinant = determinant_4(&matrix);
+
+        assert_eq!(determinant, -2120.0);
+        assert!(is_invertible_4(&matrix));
+    }
+
+    #[test]
+    fn test_is_not_invertible_4() {
+        let matrix = Matrix4::new([4.0,2.0,-2.0,-3.0,9.0,6.0,2.0,6.0,0.0,-5.0,1.0,-5.0,0.0,0.0,0.0,0.0]);
+        let determinant = determinant_4(&matrix);
+
+        assert_eq!(determinant, 0.0);
+        assert!(!is_invertible_4(&matrix));
     }
 }

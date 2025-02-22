@@ -1,5 +1,3 @@
-use tuples::Tuple;
-use std::cmp;
 use color::Color;
 
 const LINE_SIZE: usize = 70;
