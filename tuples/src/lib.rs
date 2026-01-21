@@ -2,9 +2,11 @@ const EPSILON: f32 = 0.0001;
 
 #[derive(Debug)]
 #[allow(dead_code)]
-#[derive(PartialEq)]
 #[derive(Clone)]
 #[derive(Copy)]
+/// Data structure that can represent a point or a vector
+/// if w is 0 it is a vector
+/// if w is 1 it is a point
 pub struct Tuple {
     x: f32,
     y: f32,
@@ -50,7 +52,6 @@ impl Tuple {
 }
 
 impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,f32) {
-
     fn eq(&self, other: &Tuple) -> bool {
         float_cmp(self.0, other.x) && 
         float_cmp(self.1,other.y) &&
@@ -59,21 +60,32 @@ impl<'a, 'b> PartialEq<Tuple> for (f32,f32,f32,f32) {
     }
 }
 
-impl<'a, 'b> PartialEq<(f32,f32,f32,f32)> for Tuple {
+impl<'a,'b> PartialEq<(f32,f32,f32,f32)> for  Tuple{
+
     fn eq(&self, other: &(f32,f32,f32,f32)) -> bool {
-        float_cmp(self.x,other.0) &&
-        float_cmp(self.y,other.1) &&
-        float_cmp(self.z,other.2) &&
-        float_cmp(self.w,other.3)
+        float_cmp(self.x, other.0) &&
+            float_cmp(self.y,other.1) &&
+            float_cmp(self.z,other.2) &&
+            float_cmp(self.w,other.3)
+    }
+}
+
+impl<'a,'b> PartialEq<Tuple> for  Tuple{
+
+    fn eq(&self, other: &Tuple) -> bool {
+        float_cmp(self.x, other.x) &&
+            float_cmp(self.y,other.y) &&
+            float_cmp(self.z,other.z) &&
+            float_cmp(self.w,other.w)
     }
 }
 
 pub fn float_cmp(a: f32, b:f32) -> bool {
     let delta = a - b;
     if delta.abs() < EPSILON {
-        return true;
-    } else { 
-        return false;
+        true
+    } else {
+        false
     }
 }
 

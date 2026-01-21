@@ -1,6 +1,7 @@
 const EPSILON: f32 = 0.0001;
 
 use core::fmt;
+use std::ops::Mul;
 use tuples::Tuple;
 
 // TODO Figure out how to do simd operations for efficieny
@@ -33,23 +34,37 @@ impl Matrix4 {
 
 impl PartialEq<Matrix4> for Matrix4 {
     fn eq(&self, other: &Matrix4) -> bool {
-            // deciding to compare directly here rather than looping to avoid overhead.
-            float_cmp(self.entries[0], other.entries[0]) &&
-            float_cmp(self.entries[1], other.entries[1]) &&
-            float_cmp(self.entries[2], other.entries[2]) &&
-            float_cmp(self.entries[3], other.entries[3]) &&
-            float_cmp(self.entries[4], other.entries[4]) &&
-            float_cmp(self.entries[5], other.entries[5]) &&
-            float_cmp(self.entries[6], other.entries[6]) &&
-            float_cmp(self.entries[7], other.entries[7]) &&
-            float_cmp(self.entries[8], other.entries[8]) &&
-            float_cmp(self.entries[9], other.entries[9]) &&
-            float_cmp(self.entries[10], other.entries[10]) &&
-            float_cmp(self.entries[11], other.entries[11]) &&
-            float_cmp(self.entries[12], other.entries[12]) &&
-            float_cmp(self.entries[13], other.entries[13]) &&
-            float_cmp(self.entries[14], other.entries[14]) &&
-            float_cmp(self.entries[15], other.entries[15])
+        !(!float_cmp(self.entries[0], other.entries[0]) ||
+             !float_cmp(self.entries[1], other.entries[1]) ||
+            !float_cmp(self.entries[2], other.entries[2]) ||
+            !float_cmp(self.entries[3], other.entries[3]) ||
+            !float_cmp(self.entries[4], other.entries[4]) ||
+            !float_cmp(self.entries[5], other.entries[5]) ||
+            !float_cmp(self.entries[6], other.entries[6]) ||
+            !float_cmp(self.entries[7], other.entries[7]) ||
+            !float_cmp(self.entries[8], other.entries[8]) ||
+            !float_cmp(self.entries[9], other.entries[9]) ||
+            !float_cmp(self.entries[10], other.entries[10]) ||
+            !float_cmp(self.entries[11], other.entries[11]) ||
+            !float_cmp(self.entries[12], other.entries[12]) ||
+            !float_cmp(self.entries[13], other.entries[13]) ||
+            !float_cmp(self.entries[14], other.entries[14]) ||
+            !float_cmp(self.entries[15], other.entries[15]))
+    }
+}
+
+impl Mul for Matrix4 {
+    type Output = Matrix4;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        multiply_4(&self, &rhs)
+    }
+}
+
+impl Mul<Tuple> for Matrix4 {
+    type Output = Tuple;
+    fn mul(self, rhs: Tuple) -> Self::Output {
+        multiply_tuple_4(&self, &rhs)
     }
 }
 
@@ -199,6 +214,60 @@ pub fn determinant_4(matrix: &Matrix4) -> f32 {
         matrix.get(0,1) * cofactor_4(matrix, 0,1) +
         matrix.get(0,2) * cofactor_4(matrix, 0,2) +
         matrix.get(0,3) * cofactor_4(matrix, 0,3)
+}
+fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
+    Matrix4::new([
+        1.0,0.0,0.0,x,
+        0.0,1.0,0.0,y,
+        0.0,0.0,1.0,z,
+        0.0,0.0,0.0,1.0
+
+    ])
+}
+
+fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
+    Matrix4::new([
+        x, 0.0, 0.0,0.0,
+        0.0, y, 0.0, 0.0,
+        0.0, 0.0, z, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ])
+}
+
+fn rotation_x(radians: f32) -> Matrix4 {
+    Matrix4::new([
+        1.0, 0.0, 0.0, 0.0,
+        0.0, radians.cos(), -radians.sin(), 0.0,
+        0.0, radians.sin(), radians.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ])
+}
+
+fn rotation_y(radians: f32) -> Matrix4 {
+    Matrix4::new([
+        radians.cos(), 0.0, radians.sin(), 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -radians.sin(), 0.0, radians.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ])
+}
+
+fn rotation_z(radians: f32) -> Matrix4 {
+    Matrix4::new([
+        radians.cos(), -radians.sin(), 0.0, 0.0,
+        radians.sin(), radians.cos(), 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ])
+}
+
+fn shearing(x_y: f32, x_z: f32, y_x: f32, y_z: f32, z_x: f32, z_y: f32) -> Matrix4 {
+    Matrix4::new([
+        1.0, x_y, x_z, 0.0,
+        y_x, 1.0, y_z, 0.0,
+        z_x, z_y, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ])
 }
 
 // ==================================== MATRIX 3 =================================== //
@@ -362,7 +431,8 @@ pub fn inverse_4(matrix: &Matrix4) -> Matrix4  {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cofactor_4, minor_4};
+    use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
+    use crate::{cofactor_4, minor_4, rotation_x, rotation_y, rotation_z, scaling, shearing, translation};
     use crate::determinant_2;
     use crate::determinant_3;
     use crate::determinant_4;
@@ -379,7 +449,7 @@ mod tests {
     use crate::Matrix4;
     use crate::{cofactor_3, inverse_4, is_invertible_4};
     use std::time::SystemTime;
-    use tuples::Tuple;
+    use tuples::{create_point, create_vector, Tuple};
 
     #[test]
     fn basic_get_4() {
@@ -431,10 +501,12 @@ mod tests {
         let matrix_b = Matrix4::new([-2.0,1.0,2.0,3.0,3.0,2.0,1.0,-1.0,4.0,3.0,6.0,5.0,1.0,2.0,7.0,8.0]);
 
         let result = multiply_4(&matrix_a, &matrix_b);
+        let expected = Matrix4::new([20.0,22.0,50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0, 26.0, 46.0, 42.0 ]);
+        assert_eq!(result, expected);
+
 
         let expected = Matrix4::new([20.0,22.0,50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0, 26.0, 46.0, 42.0 ]);
-
-        assert_eq!(result, expected);
+        assert_eq!(matrix_a * matrix_b, expected);
 
     }
 
@@ -654,23 +726,6 @@ mod tests {
         let cofactor_k = cofactor_4(&matrix, 2,2);
         let cofactor_l = cofactor_4(&matrix, 2,3);
 
-        println!("cofactor A:");
-        println!("{}" , cofactor_a);
-
-        println!("cofactor B:");
-        println!("{}" , cofactor_b);
-
-        println!("cofactor C:");
-        println!("{}" , cofactor_c);
-
-        println!("minor C:");
-        let minor_c = minor_4(&matrix, 0, 2);
-        println!("{}" , minor_c);
-
-
-        println!("cofactor L:");
-        println!("{}" , cofactor_l);
-
         assert_eq!(cofactor_a, 60.0);
         assert_eq!(cofactor_b,  -165.0);
         assert_eq!(cofactor_c, -60.0);
@@ -767,8 +822,6 @@ mod tests {
             -0.07895, -0.22368, -0.05263, 0.19737,
             -0.52256, -0.81391, -0.30075, 0.30639]);
 
-        print!("{}", inverse);
-        print!("{}", expected_inverse);
         assert_eq!(inverse, expected_inverse);
 
         let matrix_2 = Matrix4::new([
@@ -818,8 +871,153 @@ mod tests {
         let matrix_c: Matrix4 = multiply_4(&matrix_a, &matrix_b);
         let matrix_b_inverse  = inverse_4(&matrix_b);
         assert_eq!(multiply_4(&matrix_c, &matrix_b_inverse), matrix_a);
+    }
 
+    #[test]
+    fn test_translation_point() {
+        let transform: Matrix4 = translation(5.0,-3.0,2.0);
+        let p: Tuple = Tuple::new(-3.0, 4.0, 5.0, 1.0);
+        let p_prime: Tuple = Tuple::new(2.0,1.0,7.0, 1.0);
+        assert_eq!(multiply_tuple_4(&transform, &p) , p_prime)
+    }
 
+    #[test]
+    fn test_translation_vector() {
+        let transform: Matrix4 = translation(5.0,-3.0,2.0);
+        let p: Tuple = Tuple::new(-3.0, 4.0, 5.0, 0.0);
+        let p_prime: Tuple = Tuple::new(-3.0,4.0,5.0, 0.0);
+        assert_eq!(multiply_tuple_4(&transform, &p) , p_prime)
+    }
+
+    #[test]
+    fn test_scaling_point() {
+        let transform: Matrix4 = scaling(2.0, 3.0, 4.0);
+        let p: Tuple = create_point(-4.0,6.0,8.0);
+        let p_prime: Tuple = create_point(-8.0,18.0,32.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), p_prime)
+    }
+
+    #[test]
+    fn test_scaling_vector() {
+        let transform: Matrix4 = scaling(2.0, 3.0, 4.0);
+        let p: Tuple = create_vector(-4.0,6.0,8.0);
+        let p_prime: Tuple = create_vector(-8.0,18.0,32.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), p_prime)
+    }
+
+    #[test]
+    fn test_inverse_scaling_vector() {
+        let mut transform: Matrix4 = scaling(2.0, 3.0, 4.0);
+        transform = inverse_4(&transform);
+        let p: Tuple = create_vector(-4.0,6.0,8.0);
+        let p_prime: Tuple = create_vector(-2.0,2.0,2.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), p_prime)
+    }
+
+    #[test]
+    fn test_reflect_point() {
+        let transform = scaling(-1.0,1.0,1.0);
+        let point: Tuple = create_point(2.0,3.0,4.0);
+        let p_prime: Tuple = create_point(-2.0,3.0,4.0);
+        assert_eq!(multiply_tuple_4(&transform, &point), p_prime)
+    }
+
+    #[test]
+    fn test_rotation_x() {
+        let point = create_point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_x(FRAC_PI_4);
+        let full_quarter = rotation_x(FRAC_PI_2);
+        let two: f32 = 2.0;
+        assert_eq!(multiply_tuple_4(&half_quarter, &point), create_point(0.0, two.sqrt()/2.0, two.sqrt()/2.0));
+        assert_eq!(multiply_tuple_4(&full_quarter, &point), create_point(0.0, 0.0,1.0));
+    }
+
+    #[test]
+    fn test_reverse_rotation_x() {
+        let point = create_point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_x(FRAC_PI_4);
+        let two: f32 = 2.0;
+        let inv = inverse_4(&half_quarter);
+        assert_eq!(multiply_tuple_4(&inv, &point), create_point(0.0, two.sqrt()/2.0, -two.sqrt()/2.0));
+    }
+
+    #[test]
+    fn test_rotation_y() {
+        let point = create_point(0.0, 0.0, 1.0);
+        let half_quarter = rotation_y(FRAC_PI_4);
+        let two: f32 = 2.0;
+        let sqrt_two_over_two = two.sqrt()/2.0;
+        assert_eq!(multiply_tuple_4(&half_quarter, &point), create_point(sqrt_two_over_two, 0.0, sqrt_two_over_two));
+    }
+
+    #[test]
+    fn test_rotation_z() {
+        let point = create_point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_z(FRAC_PI_4);
+        let full_quarter = rotation_z(FRAC_PI_2);
+        let two: f32 = 2.0;
+        let sqrt_two_over_two = two.sqrt()/2.0;
+        assert_eq!(multiply_tuple_4(&half_quarter, &point), create_point(-sqrt_two_over_two,sqrt_two_over_two, 0.0));
+        assert_eq!(multiply_tuple_4(&full_quarter, &point), create_point(-1.0, 0.0,0.0));
+    }
+
+    #[test]
+    fn test_shearing() {
+        let mut transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let mut p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(5.0, 3.0, 4.0));
+
+        transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(6.0, 3.0, 4.0));
+
+        transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(2.0, 5.0, 4.0));
+
+        transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(2.0, 7.0, 4.0));
+
+        transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(2.0, 3.0, 6.0));
+
+        transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        p = create_point(2.0, 3.0, 4.0);
+        assert_eq!(multiply_tuple_4(&transform, &p), create_point(2.0, 3.0, 7.0));
 
     }
+
+    #[test]
+    fn test_transformation_sequence() {
+        let p = create_point(1.0, 0.0, 1.0);
+        let a = rotation_x(FRAC_PI_2);
+        let b = scaling(5.0, 5.0, 5.0);
+        let c = translation(10.0, 5.0, 7.0);
+
+        let p2 = multiply_tuple_4(&a, &p);
+        assert_eq!(p2, create_point(1.0 ,-1.0, 0.0));
+
+        let p3 = multiply_tuple_4(&b, &p2);
+        assert_eq!(p3, create_point(5.0 ,-5.0, 0.0));
+
+        let p4 = multiply_tuple_4(&c, &p3);
+        assert_eq!(p4, create_point(15.0 ,0.0, 7.0));
+    }
+
+    #[test]
+    fn test_transformation_sequence_combined() {
+        let p = create_point(1.0, 0.0, 1.0);
+        let a = rotation_x(FRAC_PI_2);
+        let b = scaling(5.0, 5.0, 5.0);
+        let c = translation(10.0, 5.0, 7.0);
+
+        // let t =
+        //
+        //
+        // let result = multiply_tuple_4(&t, &p);
+        // assert_eq!(result, create_point(15.0 ,0.0, 7.0));
+    }
+
 }
